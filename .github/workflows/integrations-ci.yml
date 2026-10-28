@@ -1,0 +1,37 @@
+name: Aureon Integrations Quality Gate
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/**'
+      - '.github/workflows/integrations-ci.yml'
+  pull_request:
+    paths:
+      - 'integrations/**'
+      - '.github/workflows/integrations-ci.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Test integrations and completion gates
+        run: node --test integrations/*.test.mjs
+      - name: Ensure full 101-rule registry
+        run: |
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const policy=JSON.parse(fs.readFileSync('integrations/policy-rules.json','utf8'));
+            const ids=policy.rules.map(r=>r.id);
+            if(ids.length!==101 || new Set(ids).size!==101 || ids.some((n,i)=>n!==i+1)) {
+              console.error('Missing or duplicated mandatory rule'); process.exit(1);
+            }
+            console.log('101/101 rules registered');
+          "
