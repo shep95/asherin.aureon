@@ -1,6 +1,7 @@
 // Build a complete, deterministic work queue for EVERY discovered API.
 // This is task orchestration data, not a claim of automatically deployed plugins.
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {enforceTaskCompletion,enforceBatchCompletion} from './completion-gate.mjs';
 import {fileURLToPath} from 'node:url';
 export const STAGES=Object.freeze(['research','plan','optimize_plan','implement','unit_test','integration_test','narrative_review','narrative_patch_plan','patch','regression_test','visual_qa','security_qa','release_review']);
 export function makeQueue({apis,countries}){
@@ -29,3 +30,7 @@ export async function main(path='integrations/data/discovery.json'){
  console.log(JSON.stringify({total:queue.total,countries:queue.countriesIndexed,ready:queue.tasks.filter(t=>t.state==='pending_research').length,completed:0}));
 }
 if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1])main().catch(e=>{console.error(e);process.exitCode=1});
+
+// Only these gates may certify an individual task or complete catalog.
+export function certifyTask(task){return enforceTaskCompletion(task)}
+export function certifyCatalog(queue){return enforceBatchCompletion(queue)}
