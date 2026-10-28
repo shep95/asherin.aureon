@@ -1,0 +1,7 @@
+// Read-only public discovery; never claims that listing an API creates a connection.
+import {writeFile,mkdir} from 'node:fs/promises';
+const get=async url=>{const r=await fetch(url,{signal:AbortSignal.timeout(30000)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()};
+export function normalizeCountries(rows){return rows.filter(x=>/^[A-Z]{2}$/.test(x.iso2Code||'')&&x.region?.value!=='Aggregates').map(x=>({iso2:x.iso2Code,iso3:x.id,name:x.name,region:x.region?.value??null})).sort((a,b)=>a.name.localeCompare(b.name))}
+export function normalizeAPIs(index){return Object.entries(index).flatMap(([id,p])=>{const v=p?.versions?.[p.preferred]??Object.values(p?.versions||{})[0];return v?[{id,name:v.info?.title||id,openApiUrl:v.swaggerUrl||null,countryCoverage:'unverified',connectionStatus:'not_connected'}]:[]}).sort((a,b)=>a.id.localeCompare(b.id))}
+export async function run(){const [c,a]=await Promise.all([get('https://api.worldbank.org/v2/country?format=json&per_page=400'),get('https://api.apis.guru/v2/list.json')]);const result={retrievedAt:new Date().toISOString(),sources:['https://api.worldbank.org/v2/country?format=json&per_page=400','https://api.apis.guru/v2/list.json'],countries:normalizeCountries(c[1]),apis:normalizeAPIs(a)};await mkdir('integrations/data',{recursive:true});await writeFile('integrations/data/discovery.json',JSON.stringify(result,null,2));return {countries:result.countries.length,apis:result.apis.length}}
+if(process.argv[1]?.endsWith('/discover.mjs'))run().then(console.log).catch(e=>{console.error(e);process.exitCode=1});
