@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'integrations/**'
+      - 'agents/**'
       - '.github/workflows/integrations-ci.yml'
   pull_request:
     paths:
@@ -23,7 +24,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test integrations and completion gates
-        run: node --test integrations/*.test.mjs
+        run: node --test integrations/*.test.mjs agents/*.test.mjs
       - name: Ensure full 101-rule registry
         run: |
           node --input-type=module -e "
