@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ConnectorRegistry, validateProvider} from './registry.js';
+import {ConnectorRegistry, validateProvider} from './registry.mjs';
 const valid = {id:'world-bank',name:'World Bank',homepage:'https://www.worldbank.org',authType:'none',countries:['GLOBAL'],capabilities:['economic-data']};
 test('valid provider and country query',()=>{
   const registry=new ConnectorRegistry();
