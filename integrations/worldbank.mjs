@@ -10,5 +10,5 @@ export async function worldBankIndicator({country,indicator,year,fetchImpl=fetch
  if(!response.ok)throw new Error('World Bank upstream HTTP '+response.status);
  const data=await response.json();
  if(!Array.isArray(data)||!Array.isArray(data[1]))throw new Error('World Bank returned no observations');
- return {source:'World Bank Open Data',sourceUrl:path,observations:data[1].map(v=>({country:v.country?.value??null,date:v.date,value:v.value,indicator:v.indicator?.value??indicator})),connected:true,authType:'none'};
+ return {source:'World Bank Open Data',sourceUrl:path,observations:data[1].map(v=>({country:v.country?.value??null,date:v.date,value:v.value,indicator:v.indicator?.value??indicator})),liveData:true,accountConnection:false,authType:'none'};
 }
