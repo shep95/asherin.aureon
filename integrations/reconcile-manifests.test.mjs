@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {reconcile} from './reconcile-manifests.mjs';
+test('parsed specs remain unapproved, incomplete work',()=>{const out=reconcile({apis:[{id:'x'}]},{providers:[{provider:'x',status:'codegen_unreviewed',sha256:'abc',specSource:'https://api.apis.guru/x',operations:[{id:'a'}]}]});assert.equal(out.tasks[0].state,'review_required');assert.equal(out.tasks[0].research.operationCount,1)});
+test('blocked upstream specs are not represented as completed',()=>{const out=reconcile({apis:[{id:'x'}]},{providers:[{provider:'x',status:'blocked',reason:'not reachable'}]});assert.equal(out.tasks[0].state,'blocked');assert.match(out.tasks[0].reason,/not reachable/)});
+test('no manifest results in explicit blocker',()=>{const out=reconcile({apis:[{id:'x'}]},{providers:[]});assert.equal(out.tasks[0].state,'blocked')});
