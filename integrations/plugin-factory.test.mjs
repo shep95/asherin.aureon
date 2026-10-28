@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {generatePluginScaffold} from './plugin-factory.mjs';
+test('safe scaffold remains unconnected',()=>{const p=generatePluginScaffold({id:'example-provider',name:'Example',openApiUrl:'https://example.com/openapi.json',authType:'oauth2'});assert.equal(p.state,'scaffold_not_connected');assert.equal(p.credentialReference,'required_server_side');assert.equal(p.approvalRequired,true)});
+test('reject URLs with embedded secrets',()=>assert.throws(()=>generatePluginScaffold({id:'example-provider',name:'Example',openApiUrl:'https://user:pass@example.com/openapi.json'})));
+test('reject secret-like extra fields by excluding them from output',()=>{const p=generatePluginScaffold({id:'example-provider',name:'Example',openApiUrl:'https://example.com/openapi.json',apiKey:'secret'});assert.equal(JSON.stringify(p).includes('secret'),false)});
