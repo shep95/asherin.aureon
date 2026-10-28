@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {normalizeCountries,normalizeAPIs} from './discover.mjs';
+test('exclude aggregates',()=>assert.deepEqual(normalizeCountries([{iso2Code:'US',id:'USA',name:'US',region:{value:'North America'}},{iso2Code:'1A',id:'WLD',name:'World',region:{value:'Aggregates'}}]).map(x=>x.iso2),['US']));
+test('discovery never equals connection',()=>{const v=normalizeAPIs({example:{preferred:'1',versions:{1:{info:{title:'Example'},swaggerUrl:'https://example.com/openapi'}}}});assert.equal(v[0].connectionStatus,'not_connected');assert.equal(v[0].countryCoverage,'unverified')});
