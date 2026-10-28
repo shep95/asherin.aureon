@@ -19,6 +19,7 @@ on:
 permissions:
   contents: read
   models: read
+  issues: write
 jobs:
   agent:
     if: github.event_name != 'issues' || (github.event.issue.user.login == 'shep95' && startsWith(github.event.issue.title, '[aureon-agent]'))
@@ -42,3 +43,12 @@ jobs:
           name: aureon-agent-report
           path: agent-results/latest.json
           if-no-files-found: error
+
+      - name: Report completed execution to originating issue
+        if: github.event_name == 'issues' && success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: gh issue comment "$ISSUE_NUMBER" --body "Aureon AI worker executed and saved its structured report as a workflow artifact. Inspect the result and its verification limits: $RUN_URL"
