@@ -4,7 +4,7 @@ const METHODS=new Set(['get','head','post','put','patch','delete']);
 export function compileOperations(spec) {
  if(!spec||typeof spec!=='object'||(!spec.openapi&&!spec.swagger))throw new TypeError('validated OpenAPI specification required');
  const servers=Array.isArray(spec.servers)?spec.servers: [];
- const origin=servers.find(x=>typeof x.url==='string'&&/^https:\/\//.test(x.url))?.url;
+ const origin=servers.find(x=>typeof x.url==='string'&&/^https:\/\//.test(x.url))?.url || (spec.swagger==='2.0'&&typeof spec.host==='string'&&/^[a-z0-9.-]+(?::[0-9]{2,5})?$/i.test(spec.host)&&Array.isArray(spec.schemes)&&spec.schemes.includes('https')?'https://'+spec.host+(typeof spec.basePath==='string'&&spec.basePath.startsWith('/')?spec.basePath:''):undefined);
  if(!origin)throw new Error('explicit HTTPS server required; Swagger 2 base URLs need separate review');
  const base=new URL(origin);
  if(base.username||base.password||base.hash||!/^https:$/.test(base.protocol))throw new Error('invalid server');
